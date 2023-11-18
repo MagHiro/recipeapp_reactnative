@@ -2,6 +2,9 @@ import { Text } from 'react-native';
 import React, { Component } from 'react';
 import { recipes, categories, ingredients } from './dataArrays';
 
+const apiUrl = 'https://themealdb.com/api/json/v1/1';
+
+
 export function getCategoryById(categoryId) {
   let category;
   categories.map(data => {
@@ -32,6 +35,16 @@ export function getIngredientUrl(ingredientID) {
   return url;
 }
 
+export function getCategoryNameTes(categoryId) {
+  let name;
+  categories.map(data => {
+    if (data.id == categoryId) {
+      name = data.name;
+    }
+  });
+  return name;
+}
+
 export function getCategoryName(categoryId) {
   let name;
   categories.map(data => {
@@ -39,6 +52,7 @@ export function getCategoryName(categoryId) {
       name = data.name;
     }
   });
+  console.log('rendered data' + name);
   return name;
 }
 
