@@ -1,12 +1,25 @@
-import React, { useLayoutEffect } from "react";
+import React, { useLayoutEffect, useEffect, useState } from "react";
 import { FlatList, Text, View, Image, TouchableHighlight } from "react-native";
 import styles from "./styles";
-import { categories } from "../../data/dataArrays";
-import { getNumberOfRecipes } from "../../data/MockDataAPI";
+import { fetchData } from "../../data/MockDataAPI";
 import MenuImage from "../../components/MenuImage/MenuImage";
 
 export default function CategoriesScreen(props) {
   const { navigation } = props;
+
+  const [category, SetCategory] = useState([]);
+  useEffect(() => {
+    handleFetchData();
+  }, []);
+
+  const handleFetchData = async () => {
+    try {
+      const data = await fetchData("categories.php");
+      SetCategory(data.categories);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -34,18 +47,17 @@ export default function CategoriesScreen(props) {
   };
 
   const renderCategory = ({ item }) => (
-    <TouchableHighlight underlayColor="rgba(73,182,77,0.9)" onPress={() => onPressCategory(item)}>
+    <TouchableHighlight underlayColor="rgba(73,182,77,0.9)" onPress={() => onPressCategory(item.strCategory)}>
       <View style={styles.categoriesItemContainer}>
-        <Image style={styles.categoriesPhoto} source={{ uri: item.photo_url }} />
-        <Text style={styles.categoriesName}>{item.name}</Text>
-        <Text style={styles.categoriesInfo}>{getNumberOfRecipes(item.id)} recipes</Text>
+        <Image style={styles.categoriesPhoto} source={{ uri: item.strCategoryThumb }} />
+        <Text style={styles.categoriesName}>{item.strCategory}</Text>
       </View>
     </TouchableHighlight>
   );
 
   return (
     <View>
-      <FlatList data={categories} renderItem={renderCategory} keyExtractor={(item) => `${item.id}`} />
+      <FlatList data={category} renderItem={renderCategory} keyExtractor={(item) => item.idCategory} />
     </View>
   );
 }

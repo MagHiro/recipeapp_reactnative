@@ -2,7 +2,7 @@ import React, { useEffect, useLayoutEffect, useState } from "react";
 import { FlatList, Text, View, Image, TouchableHighlight, Pressable } from "react-native";
 import styles from "./styles";
 import MenuImage from "../../components/MenuImage/MenuImage";
-import { getCategoryName, getRecipesByRecipeName, getRecipesByCategoryName, getRecipesByIngredientName } from "../../data/MockDataAPI";
+import { getCategoryName, getRecipesByRecipeName, getRecipesByCategoryName, getRecipesByIngredientName, fetchData } from "../../data/MockDataAPI";
 import { TextInput } from "react-native-gesture-handler";
 
 export default function SearchScreen(props) {
@@ -29,7 +29,7 @@ export default function SearchScreen(props) {
             value={value}
           />
           <Pressable onPress={() => handleSearch("")}>
-          <Image style={styles.searchIcon} source={require("../../../assets/icons/close.png")} />
+            <Image style={styles.searchIcon} source={require("../../../assets/icons/close.png")} />
           </Pressable>
         </View>
       ),
@@ -37,21 +37,26 @@ export default function SearchScreen(props) {
     });
   }, [value]);
 
-  useEffect(() => {}, [value]);
+  useEffect(() => { }, [value]);
 
-  const handleSearch = (text) => {
+  const handleSearch = async (text) => {
     setValue(text);
-    var recipeArray1 = getRecipesByRecipeName(text);
-    var recipeArray2 = getRecipesByCategoryName(text);
-    var recipeArray3 = getRecipesByIngredientName(text);
-    var aux = recipeArray1.concat(recipeArray2);
-    var recipeArray = [...new Set(aux)];
-
-    if (text == "") {
-      setData([]);
-    } else {
-      setData(recipeArray);
+    try {
+      const data = await fetchData(`search.php?s=${text}`);
+      setData(data.meals);
+    } catch (error) {
+      console.log(error);
     }
+    // var recipeArray1 = getRecipesByRecipeName(text);
+    // var recipeArray2 = getRecipesByCategoryName(text);
+    // var aux = recipeArray1.concat(recipeArray2);
+    // var recipeArray = [...new Set(aux)];
+
+    // if (text == "") {
+    //   setData([]);
+    // } else {
+    //   setData(recipeArray);
+    // }
   };
 
   const onPressRecipe = (item) => {
@@ -59,18 +64,18 @@ export default function SearchScreen(props) {
   };
 
   const renderRecipes = ({ item }) => (
-    <TouchableHighlight underlayColor="rgba(73,182,77,0.9)" onPress={() => onPressRecipe(item)}>
+    <TouchableHighlight underlayColor="rgba(73,182,77,0.9)" onPress={() => onPressRecipe(item.idMeal)}>
       <View style={styles.container}>
-        <Image style={styles.photo} source={{ uri: item.photo_url }} />
-        <Text style={styles.title}>{item.title}</Text>
-        <Text style={styles.category}>{getCategoryName(item.categoryId)}</Text>
+        <Image style={styles.photo} source={{ uri: item.strMealThumb }} />
+        <Text style={styles.title}>{item.strMeal}</Text>
+        <Text style={styles.category}>{item.strCategory}</Text>
       </View>
     </TouchableHighlight>
   );
 
   return (
     <View>
-      <FlatList vertical showsVerticalScrollIndicator={false} numColumns={2} data={data} renderItem={renderRecipes} keyExtractor={(item) => `${item.recipeId}`} />
+      <FlatList vertical showsVerticalScrollIndicator={false} numColumns={2} data={data} renderItem={renderRecipes} keyExtractor={(item) => item.idMeal} />
     </View>
   );
 }
